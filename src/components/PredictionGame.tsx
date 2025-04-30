@@ -62,6 +62,7 @@ const PredictionGame: React.FC = () => {
       if (price) {
         setLockedPrice(price);
         setGameState(GameState.PREDICTING);
+        toast.success("Price locked! Prediction started.");
       }
     } catch (error) {
       toast.error("Failed to start prediction");
