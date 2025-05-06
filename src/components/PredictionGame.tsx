@@ -7,12 +7,15 @@ import TimerSlider from '@/components/TimerSlider';
 import CountdownTimer from '@/components/CountdownTimer';
 import ResultDisplay from '@/components/ResultDisplay';
 import { fetchBitcoinPrice } from '@/lib/api';
+import { ArrowUpIcon, ArrowDownIcon } from 'lucide-react';
 
 enum GameState {
   IDLE = 'idle',
   PREDICTING = 'predicting',
   RESULT = 'result'
 }
+
+type PredictionType = 'up' | 'down' | null;
 
 const PredictionGame: React.FC = () => {
   // Game state
@@ -22,6 +25,9 @@ const PredictionGame: React.FC = () => {
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
   const [lockedPrice, setLockedPrice] = useState<number | null>(null);
   const [finalPrice, setFinalPrice] = useState<number | null>(null);
+  
+  // Prediction
+  const [userPrediction, setUserPrediction] = useState<PredictionType>(null);
   
   // Timer settings
   const [timerDuration, setTimerDuration] = useState<number>(30);
@@ -55,6 +61,12 @@ const PredictionGame: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [fetchPrice, gameState]);
   
+  // Handle prediction selection
+  const handlePrediction = (prediction: PredictionType) => {
+    setUserPrediction(prediction);
+    handleStartPrediction();
+  };
+  
   // Handle start prediction
   const handleStartPrediction = async () => {
     try {
@@ -87,6 +99,7 @@ const PredictionGame: React.FC = () => {
     setGameState(GameState.IDLE);
     setLockedPrice(null);
     setFinalPrice(null);
+    setUserPrediction(null);
   };
   
   return (
@@ -141,6 +154,7 @@ const PredictionGame: React.FC = () => {
             <ResultDisplay 
               startPrice={lockedPrice!} 
               endPrice={finalPrice!} 
+              userPrediction={userPrediction}
             />
           </div>
         )}
@@ -154,13 +168,28 @@ const PredictionGame: React.FC = () => {
       {/* Action Button */}
       <div className="text-center">
         {gameState === GameState.IDLE && (
-          <Button
-            onClick={handleStartPrediction}
-            disabled={!currentPrice}
-            className="bg-bitcoin hover:bg-bitcoin/80 text-black font-bold px-8 py-6"
-          >
-            Start Prediction
-          </Button>
+          <div className="flex flex-col gap-4 items-center">
+            <p className="text-sm text-muted-foreground mb-2">Make your prediction:</p>
+            <div className="flex gap-4">
+              <Button
+                onClick={() => handlePrediction('up')}
+                disabled={!currentPrice}
+                className="bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-4 flex items-center gap-2"
+              >
+                <ArrowUpIcon size={20} />
+                Up
+              </Button>
+              
+              <Button
+                onClick={() => handlePrediction('down')}
+                disabled={!currentPrice}
+                className="bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-4 flex items-center gap-2"
+              >
+                <ArrowDownIcon size={20} />
+                Down
+              </Button>
+            </div>
+          </div>
         )}
         
         {gameState === GameState.PREDICTING && (

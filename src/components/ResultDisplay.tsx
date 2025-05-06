@@ -6,13 +6,19 @@ import { cn } from '@/lib/utils';
 interface ResultDisplayProps {
   startPrice: number;
   endPrice: number;
+  userPrediction?: 'up' | 'down' | null;
 }
 
-const ResultDisplay: React.FC<ResultDisplayProps> = ({ startPrice, endPrice }) => {
+const ResultDisplay: React.FC<ResultDisplayProps> = ({ startPrice, endPrice, userPrediction }) => {
   const priceDifference = endPrice - startPrice;
   const percentageChange = (priceDifference / startPrice) * 100;
   const isUp = priceDifference >= 0;
   
+  // Determine if prediction was correct
+  const isPredictionCorrect = 
+    (userPrediction === 'up' && isUp) || 
+    (userPrediction === 'down' && !isUp);
+
   return (
     <div className="flex flex-col items-center">
       <div className={cn(
@@ -32,7 +38,7 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ startPrice, endPrice }) =
         )}
       </div>
       
-      <div className="text-sm text-muted-foreground">
+      <div className="text-sm text-muted-foreground mb-4">
         Change: <span className={cn(
           "font-medium",
           isUp ? "text-bitcoin-success" : "text-bitcoin-danger"
@@ -40,6 +46,15 @@ const ResultDisplay: React.FC<ResultDisplayProps> = ({ startPrice, endPrice }) =
           {priceDifference.toFixed(2)} USD ({percentageChange.toFixed(2)}%)
         </span>
       </div>
+
+      {userPrediction && (
+        <div className={cn(
+          "mt-2 py-2 px-4 rounded-full text-white font-medium",
+          isPredictionCorrect ? "bg-green-500" : "bg-red-500"
+        )}>
+          {isPredictionCorrect ? "Correct Prediction! 🎉" : "Incorrect Prediction 😔"}
+        </div>
+      )}
     </div>
   );
 };
